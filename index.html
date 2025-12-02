@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarTech | Workshop de Inteligência e Integração</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- CORE DESIGN SYSTEM --- */
+        :root {
+            --primary: #2563eb; /* Royal Blue */
+            --primary-dark: #1e40af;
+            --accent: #00d4ff; /* Cyan Neon */
+            --accent-secondary: #facc15; /* Solar Yellow */
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+            --gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* --- TYPOGRAPHY & UTILS --- */
+        .container { width: 90%; max-width: 1280px; margin: 0 auto; }
+        .section-padding { padding: 100px 0; }
+        
+        h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; }
+        h2.section-title { 
+            font-size: 2.5rem; margin-bottom: 1.5rem; 
+            background: linear-gradient(to right, #fff, var(--text-muted));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        p.lead { font-size: 1.25rem; color: var(--text-muted); max-width: 800px; margin-bottom: 3rem; }
+        
+        .badge { 
+            padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
+        }
+        .badge-manual { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .badge-auto { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .badge-stats { background: rgba(0, 212, 255, 0.2); color: var(--accent); border: 1px solid var(--accent); }
+
+        /* --- BUTTONS --- */
+        .btn { padding: 14px 28px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; border: none;}
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3); }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-option { width: 100%; justify-content: center; margin-top: 15px; font-size: 0.9rem; padding: 10px; }
+        .btn-option:hover { filter: brightness(1.1); }
+
+        /* --- COMPONENTS --- */
+        .card { 
+            background: var(--bg-card); border: 1px solid var(--border); 
+            border-radius: 16px; padding: 2rem; transition: transform 0.3s ease;
+        }
+        .card:hover { border-color: var(--primary); }
+
+        /* --- NAVBAR --- */
+        .navbar { 
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 1000; padding: 1rem 0;
+        }
+        .nav-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 24px; list-style: none; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: 0.2s; }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* --- HERO SECTION --- */
+        .hero { 
+            min-height: 90vh; display: flex; align-items: center; position: relative; overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+        }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+        .stat-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
+        .stat-val { font-size: 2rem; font-weight: 800; color: var(--accent); }
+        .stat-lbl { font-size: 0.875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- MODULE: COMPARATIVE TABLE --- */
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .comp-column h3 { margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; font-size: 1.5rem;}
+        .comp-item { 
+            background: rgba(255,255,255,0.03); padding: 1.5rem; margin-bottom: 1rem; 
+            border-radius: 8px; border-left: 4px solid transparent;
+        }
+        .comp-manual .comp-item { border-left-color: var(--danger); }
+        .comp-auto .comp-item { border-left-color: var(--success); }
+        
+        .comp-item h4 { font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff; }
+        .comp-item p { font-size: 0.9rem; color: var(--text-muted); }
+        .cost-tag { display: block; margin-top: 10px; font-size: 0.85rem; font-weight: bold; }
+        .cost-manual { color: var(--danger); }
+        .cost-auto { color: var(--success); }
+
+        /* --- MODULE: INTEGRATION PIPELINE --- */
+        .pipeline-container { 
+            position: relative; padding: 2rem; background: #162032; border-radius: 20px; 
+            border: 1px solid var(--border); overflow: hidden;
+        }
+        .flow-diagram { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
+        .flow-step { 
+            text-align: center; width: 22%; background: var(--bg-card); 
+            padding: 2rem 1rem; border-radius: 12px; border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+        .flow-step:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,212,255,0.1); }
+        .flow-icon { 
+            font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-muted);
+            background: rgba(255,255,255,0.05); width: 80px; height: 80px; 
+            line-height: 80px; border-radius: 50%; margin: 0 auto 1rem auto;
+        }
+        .step-active .flow-icon { color: white; background: var(--primary); }
+        .connector { flex: 1; height: 2px; background: #334155; position: relative; margin: 0 10px; }
+        .connector::after {
+            content: ''; position: absolute; top: -4px; left: 0; width: 10px; height: 10px;
+            background: var(--accent); border-radius: 50%; animation: moveDot 2s infinite linear;
+        }
+        @keyframes moveDot { 0% { left: 0; opacity: 1; } 100% { left: 100%; opacity: 0; } }
+
+        /* --- MODULE: STATISTICS --- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+        .concept-card { background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; border-left: 3px solid var(--accent); }
+        .concept-card h4 { color: var(--accent); margin-bottom: 0.5rem; }
+        .concept-card p { font-size: 0.9rem; color: var(--text-muted); }
+
+        /* --- MODULE: WAR ROOM (NEW) --- */
+        .war-room-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
+        .decision-card { 
+            flex: 1 1 250px; max-width: 300px;
+            background: #1e293b; border: 1px solid var(--border); border-radius: 12px;
+            padding: 1.5rem; transition: transform 0.3s, box-shadow 0.3s;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .decision-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); border-color: var(--accent); }
+        .decision-icon { font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent-secondary); }
+        .decision-specs { list-style: none; margin: 1rem 0; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1rem;}
+        .decision-specs li { margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+
+        /* --- MODULE: ROI CALCULATOR --- */
+        .roi-wrapper { display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem; background: var(--bg-card); padding: 3rem; border-radius: 24px; border: 1px solid var(--border); }
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+        .range-slider { 
+            width: 100%; -webkit-appearance: none; height: 6px; background: #334155; 
+            border-radius: 5px; outline: none; margin-top: 10px;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 20px; height: 20px; background: var(--primary); 
+            border-radius: 50%; cursor: pointer; transition: 0.2s;
+        }
+        .range-slider::-webkit-slider-thumb:hover { transform: scale(1.2); background: var(--accent); }
+        .val-display { float: right; color: white; font-weight: bold; }
+        
+        .roi-output { text-align: center; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--border); padding-left: 2rem;}
+        .big-number { font-size: 3.5rem; font-weight: 800; color: var(--success); margin: 1rem 0; line-height: 1; }
+        .roi-details { text-align: left; margin-top: 2rem; font-size: 0.9rem; color: var(--text-muted); }
+        .roi-detail-item { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 8px 0; }
+
+        /* --- DASHBOARD PREVIEW --- */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .db-card { background: #162032; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
+        .chart-container { position: relative; height: 250px; }
+
+        /* --- ACADEMIC REPORT SECTION --- */
+        .report-paper {
+            background: #fff; color: #333; padding: 3rem; border-radius: 8px; 
+            max-width: 900px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-family: 'Times New Roman', serif;
+        }
+        .report-paper h2, .report-paper h3, .report-paper h4 { color: #000; font-family: 'Inter', sans-serif; }
+        .report-header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+        .report-section { margin-bottom: 30px; }
+        .report-section p { margin-bottom: 10px; line-height: 1.8; }
+        .report-section ul { margin-left: 20px; margin-bottom: 10px; }
+        .team-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .team-member { background: #eee; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; font-weight: bold; }
+
+        /* --- FOOTER --- */
+        footer { border-top: 1px solid var(--border); padding: 3rem 0; text-align: center; color: var(--text-muted); margin-top: 4rem; }
+        .footer-credits { font-size: 0.8rem; margin-top: 20px; opacity: 0.7; max-width: 800px; margin-left: auto; margin-right: auto; line-height: 1.8; }
+
+        @media (max-width: 768px) {
+            .hero-grid, .comparison-grid, .stats-grid, .roi-wrapper, .dashboard-grid { grid-template-columns: 1fr; }
+            .flow-diagram { flex-direction: column; gap: 20px; }
+            .connector { width: 2px; height: 50px; margin: 0 auto; }
+            .flow-step { width: 100%; }
+            .report-paper { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <i class="fas fa-solar-panel" style="color: var(--accent-secondary)"></i> SolarTech <span style="font-weight: 300; opacity: 0.7;">| Intelligence</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#problem">Problema</a></li>
+                <li><a href="#integration">Integração</a></li>
+                <li><a href="#statistics">Estatística</a></li>
+                <li><a href="#war-room">Decisão</a></li>
+                <li><a href="#economics">ROI</a></li>
+                <li><a href="#analytics">Dashboard</a></li>
+                <li><a href="#relatorio" style="color: var(--accent); font-weight: bold;">Relatório Acadêmico</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div>
+                <span class="badge badge-auto" style="margin-bottom: 1rem; display: inline-block;">Workshop Corporativo</span>
+                <h1>Transformando <span style="color: var(--primary)">Silos de Dados</span> em <span style="color: var(--success)">Lucro Operacional</span></h1>
+                <p class="lead" style="margin-top: 1.5rem;">
+                    Uma análise profunda sobre como a falta de integração entre Vendas, Estoque e Logística está drenando o caixa da empresa — e como a Tecnologia de Informação estanca esse sangramento.
+                </p>
+                <div style="display: flex; gap: 15px;">
+                    <a href="#economics" class="btn btn-primary">Simular Economia</a>
+                    <a href="#integration" class="btn btn-outline">Ver Fluxo de Dados</a>
+                </div>
+                
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <div class="stat-val">30%</div>
+                        <div class="stat-lbl">Redução de Custos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val">2x</div>
+                        <div class="stat-lbl">Velocidade de Atendimento</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Interactive Visual Element for Hero -->
+            <div style="position: relative;">
+                <div style="background: var(--bg-card); padding: 2rem; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); height: 320px; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center;">
+                        <h4 style="color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem;">Monitoramento em Tempo Real</h4>
+                        <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success);"></div>
+                    </div>
+                    <!-- Mini Chart -->
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="heroChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 1: COMPARATIVE ANALYSIS -->
+    <section id="problem" class="section-padding">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="section-title">Análise Comparativa de Gestão</h2>
+                <p class="lead" style="margin: 0 auto 3rem auto;">O custo invisível da desorganização vs. A eficiência da automação.</p>
+            </div>
+
+            <div class="comparison-grid">
+                <!-- Manual -->
+                <div class="comp-column comp-manual">
+                    <h3 style="color: var(--danger)"><i class="fas fa-times-circle"></i> Modelo Atual (Manual)</h3>
+                    
+                    <div class="comp-item">
+                        <h4>Gestão de Estoque Reativa</h4>
+                        <p>A compra de material só é feita quando o técnico avisa que acabou a peça na obra.</p>
+                        <span class="cost-tag cost-manual">Custo: Parada de obra + Frete de Emergência</span>
+                    </div>
+
+                    <div class="comp-item">
+                        <h4>Roteirização por "Feeling"</h4>
+                        <p>O técnico decide a rota. Muitas vezes cruza a cidade 3 vezes no dia.</p>
+                        <span class="cost-tag cost-manual">Custo: +40% em Combustível e Desgaste</span>
+                    </div>
+
+                    <div class="comp-item">
+                        <h4>Dados em Silos (Excel/Papel)</h4>
+                        <p>O financeiro não sabe o que foi instalado. O comercial não sabe o que tem no estoque.</p>
+                        <span class="cost-tag cost-manual">Risco: Inconsistência Fiscal e Perda de Vendas</span>
+                    </div>
+                </div>
+
+                <!-- Integrated -->
+                <div class="comp-column comp-auto">
+                    <h3 style="color: var(--success)"><i class="fas fa-check-circle"></i> Modelo Integrado (SIG)</h3>
+                    
+                    <div class="comp-item">
+                        <h4>Estoque Preditivo (Just-in-Time)</h4>
+                        <p>O sistema reserva a peça assim que a venda é fechada e alerta compras automaticamente.</p>
+                        <span class="cost-tag cost-auto">Ganho: Zero paradas por falta de material</span>
+                    </div>
+
+                    <div class="comp-item">
+                        <h4>Roteirização via Algoritmo</h4>
+                        <p>Software define a melhor rota baseada em trânsito e proximidade dos chamados.</p>
+                        <span class="cost-tag cost-auto">Ganho: +2 visitas técnicas por dia/equipe</span>
+                    </div>
+
+                    <div class="comp-item">
+                        <h4>Fonte Única da Verdade</h4>
+                        <p>Um Dashboard centralizado. Vendeu -> Baixou Estoque -> Gerou OS -> Faturou.</p>
+                        <span class="cost-tag cost-auto">Ganho: Auditoria em tempo real e Escalabilidade</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 2: INTEGRATION PIPELINE -->
+    <section id="integration" class="section-padding" style="background: #131c2e;">
+        <div class="container">
+            <h2 class="section-title">O Poder da Integração de Sistemas</h2>
+            <p class="lead">Como os dados viajam pela empresa sem intervenção humana no novo modelo.</p>
+
+            <div class="pipeline-container">
+                <div class="flow-diagram">
+                    <!-- Step 1 -->
+                    <div class="flow-step step-active">
+                        <div class="flow-icon"><i class="fas fa-handshake"></i></div>
+                        <h4>Venda (CRM)</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+                            Vendedor fecha contrato no tablet. Dados enviados via API.
+                        </p>
+                    </div>
+
+                    <div class="connector"></div>
+
+                    <!-- Step 2 -->
+                    <div class="flow-step step-active">
+                        <div class="flow-icon"><i class="fas fa-boxes"></i></div>
+                        <h4>Estoque (ERP)</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+                            Sistema reserva materiais e verifica necessidade de compra.
+                        </p>
+                    </div>
+
+                    <div class="connector"></div>
+
+                    <!-- Step 3 -->
+                    <div class="flow-step step-active">
+                        <div class="flow-icon"><i class="fas fa-route"></i></div>
+                        <h4>Logística (FSM)</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+                            Roteirizador cria a agenda otimizada para os técnicos.
+                        </p>
+                    </div>
+
+                    <div class="connector"></div>
+
+                    <!-- Step 4 -->
+                    <div class="flow-step step-active">
+                        <div class="flow-icon"><i class="fas fa-chart-line"></i></div>
+                        <h4>BI (Dashboard)</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+                            Diretoria acompanha margem de lucro em tempo real.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Code Snippet Simulation -->
+                <div style="margin-top: 3rem; background: #0f172a; padding: 1.5rem; border-radius: 12px; font-family: 'Fira Code', monospace; color: #cbd5e1; font-size: 0.85rem; border: 1px solid var(--border);">
+                    <div style="color: var(--text-muted); margin-bottom: 10px;">// Exemplo de Automação: Python Trigger</div>
+                    <span style="color: #c678dd">def</span> <span style="color: #61afef">processar_venda</span>(pedido):<br>
+                    &nbsp;&nbsp;<span style="color: #5c6370"># 1. Verifica disponibilidade</span><br>
+                    &nbsp;&nbsp;<span style="color: #c678dd">if</span> estoque.<span style="color: #61afef">check</span>(pedido.itens):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;estoque.<span style="color: #61afef">reservar</span>(pedido.itens)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;logistica.<span style="color: #61afef">agendar_rota</span>(cliente=pedido.cliente, prioridade=<span style="color: #98c379">'ALTA'</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c678dd">return</span> <span style="color: #98c379">"Ordem de Serviço Criada"</span><br>
+                    &nbsp;&nbsp;<span style="color: #c678dd">else</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;compras.<span style="color: #61afef">emitir_pedido_fornecedor</span>(pedido.itens)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c678dd">return</span> <span style="color: #e06c75">"Aguardando Peças"</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW MODULE: APPLIED STATISTICS -->
+    <section id="statistics" class="section-padding">
+        <div class="container">
+            <h2 class="section-title">Estatística Aplicada à Operação</h2>
+            <p class="lead">Por que analisar apenas a média é perigoso? Entendendo a variabilidade do processo.</p>
+
+            <div class="stats-grid">
+                <!-- Text Concepts -->
+                <div>
+                    <div class="concept-card">
+                        <h4><i class="fas fa-chart-area"></i> Média vs. Desvio Padrão (σ)</h4>
+                        <p>Se o tempo médio de instalação é 4 horas, mas o desvio é de 2 horas, você tem um processo instável. Metade dos clientes será atendida com atraso se você agendar baseado apenas na média.</p>
+                    </div>
+                    <div class="concept-card">
+                        <h4><i class="fas fa-shield-alt"></i> Nível de Serviço e Estoque de Segurança</h4>
+                        <p>Usamos a Distribuição Normal (Curva de Gauss) para calcular quanto estoque precisamos para garantir 95% ou 99% de atendimento (Service Level) sem rupturas.</p>
+                    </div>
+                    <div class="concept-card">
+                        <h4><i class="fas fa-project-diagram"></i> Correlação (r)</h4>
+                        <p>Analisamos se existe correlação forte entre variáveis. Ex: Chuva vs. Absenteísmo ou Distância vs. Consumo de Combustível.</p>
+                    </div>
+                </div>
+
+                <!-- Visual Chart -->
+                <div class="db-card">
+                    <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-align: center;">Variabilidade do Tempo de Instalação (Curva Normal)</h4>
+                    <div class="chart-container">
+                        <canvas id="statsChart"></canvas>
+                    </div>
+                    <p style="font-size: 0.8rem; text-align: center; margin-top: 10px; color: var(--accent);">Área em azul: 68% das instalações ocorrem entre 3h e 5h.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 3: WAR ROOM (5 OPTIONS) -->
+    <section id="war-room" class="section-padding" style="background: #111;">
+        <div class="container">
+            <div class="text-center">
+                <span class="badge badge-stats" style="margin-bottom: 1rem; display: inline-block;">Simulação de Crise</span>
+                <h2 class="section-title">Sala de Guerra (Decisão Estratégica)</h2>
+                <p class="lead">O sistema emitiu um alerta de Tempestade Severa na Zona Sul.<br>Você tem apenas <strong>uma equipe disponível</strong>. Qual chamado priorizar?</p>
+            </div>
+
+            <div class="war-room-grid">
+                
+                <!-- Option A -->
+                <div class="decision-card">
+                    <div>
+                        <div class="decision-icon"><i class="fas fa-hospital"></i></div>
+                        <h4 style="color:white;">Opção A: Hospital Estadual</h4>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Manutenção Preventiva.</p>
+                        <ul class="decision-specs">
+                            <li><i class="fas fa-ruler-horizontal"></i> Distância: 10km</li>
+                            <li><i class="fas fa-file-contract"></i> Contrato: Vital</li>
+                            <li><i class="fas fa-bolt"></i> Risco Operacional: Baixo</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary btn-option" onclick="makeDecision('A')">Priorizar Hospital</button>
+                </div>
+
+                <!-- Option B -->
+                <div class="decision-card">
+                    <div>
+                        <div class="decision-icon"><i class="fas fa-industry"></i></div>
+                        <h4 style="color:white;">Opção B: Ind. Plásticos</h4>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Parada de Produção (Emergência).</p>
+                        <ul class="decision-specs">
+                            <li><i class="fas fa-ruler-horizontal"></i> Distância: 55km</li>
+                            <li><i class="fas fa-cloud-rain"></i> Risco Clima: Alto</li>
+                            <li><i class="fas fa-money-bill-wave"></i> Valor: Muito Alto</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary btn-option" style="background: #d97706;" onclick="makeDecision('B')">Priorizar Indústria</button>
+                </div>
+
+                <!-- Option C -->
+                <div class="decision-card">
+                    <div>
+                        <div class="decision-icon"><i class="fas fa-solar-panel"></i></div>
+                        <h4 style="color:white;">Opção C: Usina Solo</h4>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Instalação de Inversores.</p>
+                        <ul class="decision-specs">
+                            <li><i class="fas fa-ruler-horizontal"></i> Distância: 120km</li>
+                            <li><i class="fas fa-road"></i> Acesso: Terra (Difícil)</li>
+                            <li><i class="fas fa-user-tie"></i> Cliente: Novo</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary btn-option" style="background: #059669;" onclick="makeDecision('C')">Priorizar Usina</button>
+                </div>
+
+                <!-- Option D -->
+                <div class="decision-card">
+                    <div>
+                        <div class="decision-icon"><i class="fas fa-shopping-bag"></i></div>
+                        <h4 style="color:white;">Opção D: Shopping Center</h4>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Vistoria Técnica Simples.</p>
+                        <ul class="decision-specs">
+                            <li><i class="fas fa-ruler-horizontal"></i> Distância: 5km</li>
+                            <li><i class="fas fa-clock"></i> Tempo: Rápido</li>
+                            <li><i class="fas fa-shield-alt"></i> Risco: Mínimo</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary btn-option" style="background: #7c3aed;" onclick="makeDecision('D')">Priorizar Shopping</button>
+                </div>
+
+                <!-- Option E -->
+                <div class="decision-card">
+                    <div>
+                        <div class="decision-icon"><i class="fas fa-home"></i></div>
+                        <h4 style="color:white;">Opção E: Residencial VIP</h4>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Cliente reclamando no Instagram.</p>
+                        <ul class="decision-specs">
+                            <li><i class="fas fa-ruler-horizontal"></i> Distância: 20km</li>
+                            <li><i class="fas fa-comment-dots"></i> Imagem: Crítica</li>
+                            <li><i class="fas fa-tools"></i> Reparo: Simples</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary btn-option" style="background: #db2777;" onclick="makeDecision('E')">Priorizar VIP</button>
+                </div>
+
+            </div>
+            
+            <div id="decisionFeedback" class="text-center" style="margin-top: 2rem; font-weight: bold; font-size: 1.2rem; min-height: 50px; color: white;"></div>
+        </div>
+    </section>
+
+    <!-- MODULE 4: ROI CALCULATOR -->
+    <section id="economics" class="section-padding" style="background: #131c2e;">
+        <div class="container">
+            <h2 class="section-title">Calculadora de ROI (Retorno sobre Investimento)</h2>
+            <p class="lead">Quanto dinheiro a SolarTech deixa na mesa por não utilizar dados?</p>
+
+            <div class="roi-wrapper">
+                <!-- Inputs -->
+                <div class="roi-inputs">
+                    <h4 style="margin-bottom: 2rem; color: white;">Parâmetros da Operação</h4>
+                    
+                    <div class="input-group">
+                        <label>Número de Equipes em Campo <span class="val-display" id="disp-teams">5</span></label>
+                        <input type="range" class="range-slider" id="in-teams" min="1" max="20" value="5">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Deslocamento Médio Diário (km/equipe) <span class="val-display" id="disp-km">100 km</span></label>
+                        <input type="range" class="range-slider" id="in-km" min="20" max="300" value="100">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Redução de Km via Roteirização (%) <span class="val-display" id="disp-opt">20%</span></label>
+                        <input type="range" class="range-slider" id="in-opt" min="5" max="50" value="20">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Custo Hora Técnica (Equipe Completa) <span class="val-display" id="disp-cost">R$ 150</span></label>
+                        <input type="range" class="range-slider" id="in-cost" min="50" max="500" value="150">
+                    </div>
+                </div>
+
+                <!-- Outputs -->
+                <div class="roi-output">
+                    <h4>Economia Mensal Estimada</h4>
+                    <div class="big-number" id="total-savings">R$ 0,00</div>
+                    
+                    <div class="roi-details">
+                        <div class="roi-detail-item">
+                            <span>Economia Combustível/Manutenção:</span>
+                            <span id="save-fuel" style="color: white; font-weight: bold;">R$ 0,00</span>
+                        </div>
+                        <div class="roi-detail-item">
+                            <span>Horas Produtivas Ganhas:</span>
+                            <span id="save-time" style="color: white; font-weight: bold;">R$ 0,00</span>
+                        </div>
+                        <div class="roi-detail-item" style="border: none; margin-top: 10px;">
+                            <span style="color: var(--accent);">Impacto Anual:</span>
+                            <span id="save-annual" style="color: var(--accent); font-weight: bold;">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 5: ANALYTICS DASHBOARD PREVIEW -->
+    <section id="analytics" class="section-padding" style="background: #0f172a;">
+        <div class="container">
+            <h2 class="section-title">O Resultado: Gestão à Vista</h2>
+            <p class="lead">Dashboard executivo gerado após o tratamento de dados.</p>
+
+            <div class="dashboard-grid">
+                <!-- Chart 1: Costs -->
+                <div class="db-card">
+                    <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted);">Comparativo de Custos Operacionais</h4>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Efficiency -->
+                <div class="db-card">
+                    <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted);">Instalações Realizadas (Produtividade)</h4>
+                    <div class="chart-container">
+                        <canvas id="prodChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Stock -->
+                <div class="db-card">
+                    <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted);">Índice de Ruptura de Estoque</h4>
+                    <div class="chart-container">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: ACADEMIC REPORT (EVIDÊNCIA DE EXTENSÃO) -->
+    <section id="relatorio" class="section-padding bg-light" style="background: #f8fafc; color: #333;">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="section-title" style="background: linear-gradient(to right, #333, #666); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Relatório de Extensão</h2>
+                <p class="lead" style="color: #666; margin-bottom: 3rem;">Documentação oficial do projeto acadêmico e workshop.</p>
+            </div>
+
+            <div class="report-paper">
+                <div class="report-header">
+                    <h2>Projeto: Inteligência de Dados para Tomada de Decisão</h2>
+                    <p><strong>Curso:</strong> Engenharia de Computação & Telecom | <strong>Data:</strong> 24 e 25/11/2025</p>
+                    <p style="margin-top: 10px;"><strong>Equipe Executora:</strong></p>
+                    <div class="team-list">
+                        <span class="team-member">Gabriel Gonzalez</span>
+                        <span class="team-member">Anderson Leonardo da Silva Vianna</span>
+                        <span class="team-member">Juliana de Sousa</span>
+                        <span class="team-member">Mylena Avelar</span>
+                        <span class="team-member">Dalton Sabaraense da Silva</span>
+                        <span class="team-member">Breno Almeida</span>
+                        <span class="team-member">Andressa Oliveira</span>
+                        <span class="team-member">Paulo Henrique</span>
+                        <span class="team-member">Karina Tavares</span>
+                        <span class="team-member">Rhuanna</span>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>FASE 1: PLANEJAMENTO</h3>
+                    <p><strong>Cenário (Problemática):</strong> A "SolarTech Soluções" enfrenta prejuízos operacionais devido a processos manuais, resultando em estoque "cego", rotas ineficientes e decisões baseadas em feeling.</p>
+                    <p><strong>Objetivo:</strong> Capacitar colaboradores a transformar dados brutos em decisões estratégicas utilizando Python para automação e Power BI para visualização.</p>
+                    <p><strong>Metodologia:</strong> Estudo de caso prático com simulação de dados reais em ambiente virtual (Google Meet).</p>
+                </div>
+
+                <div class="report-section">
+                    <h3>FASE 2: DESENVOLVIMENTO</h3>
+                    <ul>
+                        <li><strong>Diagnóstico:</strong> Mapeamento do fluxo de valor e identificação de gargalos de informação entre Vendas e Operação.</li>
+                        <li><strong>Tecnologia:</strong> Criação de scripts ETL em Python para limpeza de dados e estruturação de Dashboards executivos.</li>
+                        <li><strong>Engajamento:</strong> O workshop foi desenhado para ser interativo, desafiando os participantes a resolverem crises logísticas simuladas.</li>
+                    </ul>
+                </div>
+
+                <div class="report-section">
+                    <h3>FASE 3: APLICAÇÃO E RESULTADOS</h3>
+                    <p>A aplicação ocorreu em ambiente corporativo simulado com 10 participantes (gestores e analistas). Como evidência, foi entregue este sistema web funcional que demonstra o fluxo de ponta a ponta.</p>
+                    <p><strong>Impactos:</strong> Mudança de mindset para uma cultura Data-Driven, capacitação técnica em ferramentas de BI e compreensão do impacto financeiro da má qualidade de dados.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p style="font-weight: bold; color: white;">Workshop Integrado de Engenharia & Gestão</p>
+            <p>Desenvolvido para análise acadêmica e aplicação corporativa.</p>
+            
+            <div class="footer-credits">
+                Projeto executado por: Gabriel Gonzalez, Anderson Leonardo da Silva Vianna, Juliana de Sousa, Mylena Avelar, Dalton Sabaraense da Silva, Breno Almeida, Andressa Oliveira, Paulo Henrique, Karina Tavares e Rhuanna.
+                <br>
+                Novembro / 2025
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // --- WAR ROOM LOGIC ---
+        function makeDecision(option) {
+            const feedback = document.getElementById('decisionFeedback');
+            
+            if (option === 'A') {
+                feedback.innerHTML = '<span style="color:#3b82f6"><i class="fas fa-shield-alt"></i> Decisão Segura.</span> O hospital é prioridade social e contratual. Você garantiu receita recorrente e segurança, mas perdeu a oportunidade de alto valor da indústria.';
+            } else if (option === 'B') {
+                feedback.innerHTML = '<span style="color:#f59e0b"><i class="fas fa-exclamation-triangle"></i> Alto Risco!</span> A tempestade atrasou a equipe em 2h na estrada. A fábrica voltou a operar, gerando alto lucro, mas você pagou hora extra e arriscou um acidente.';
+            } else if (option === 'C') {
+                feedback.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> Erro Logístico.</span> A estrada de terra estava intransitável pela chuva. A equipe atolou e não atendeu ninguém hoje. Prejuízo total.';
+            } else if (option === 'D') {
+                feedback.innerHTML = '<span style="color:#a855f7"><i class="fas fa-search-dollar"></i> Decisão Oportunista.</span> Você aproveitou a proximidade, mas o valor é baixo. O hospital ficou sem manutenção e pode gerar multa amanhã.';
+            } else if (option === 'E') {
+                feedback.innerHTML = '<span style="color:#ec4899"><i class="fas fa-heart"></i> Foco na Marca.</span> O cliente VIP postou elogios e removeu a reclamação. O impacto financeiro imediato é baixo, mas evitou uma crise de RP.';
+            }
+        }
+
+        // --- ROI CALCULATOR LOGIC ---
+        const inputs = {
+            teams: document.getElementById('in-teams'),
+            km: document.getElementById('in-km'),
+            opt: document.getElementById('in-opt'),
+            cost: document.getElementById('in-cost')
+        };
+
+        const displays = {
+            teams: document.getElementById('disp-teams'),
+            km: document.getElementById('disp-km'),
+            opt: document.getElementById('disp-opt'),
+            cost: document.getElementById('disp-cost'),
+            total: document.getElementById('total-savings'),
+            fuel: document.getElementById('save-fuel'),
+            time: document.getElementById('save-time'),
+            annual: document.getElementById('save-annual')
+        };
+
+        function calculateROI() {
+            // Values
+            const teams = parseInt(inputs.teams.value);
+            const kmPerDay = parseInt(inputs.km.value);
+            const optimizationPct = parseInt(inputs.opt.value) / 100;
+            const hourlyCost = parseInt(inputs.cost.value);
+
+            // Assumptions
+            const fuelCostPerKm = 2.50; // R$/km (Combustivel + Manutenção)
+            const avgSpeed = 40; // km/h (Cidade)
+            const daysPerMonth = 22;
+
+            // Calculations
+            const kmSavedPerDay = (kmPerDay * teams) * optimizationPct;
+            const kmSavedMonth = kmSavedPerDay * daysPerMonth;
+            
+            const moneySavedFuel = kmSavedMonth * fuelCostPerKm;
+
+            const timeSavedHoursDay = kmSavedPerDay / avgSpeed;
+            const timeSavedMonth = timeSavedHoursDay * daysPerMonth;
+            
+            const moneySavedTime = timeSavedMonth * hourlyCost;
+
+            const totalMonthly = moneySavedFuel + moneySavedTime;
+            const totalAnnual = totalMonthly * 12;
+
+            // Update UI Labels
+            displays.teams.innerText = teams;
+            displays.km.innerText = kmPerDay + " km";
+            displays.opt.innerText = (optimizationPct * 100).toFixed(0) + "%";
+            displays.cost.innerText = "R$ " + hourlyCost;
+
+            // Update Results
+            const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            displays.total.innerText = fmt.format(totalMonthly);
+            displays.fuel.innerText = fmt.format(moneySavedFuel);
+            displays.time.innerText = fmt.format(moneySavedTime);
+            displays.annual.innerText = fmt.format(totalAnnual);
+        }
+
+        // Add Listeners
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', calculateROI);
+        });
+
+        // Init
+        calculateROI();
+
+
+        // --- CHARTS CONFIGURATION ---
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.font.family = 'Inter';
+
+        // 1. Cost Comparison Chart
+        new Chart(document.getElementById('costChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Combustível', 'Horas Extras', 'Retrabalho'],
+                datasets: [
+                    {
+                        label: 'Manual (Antes)',
+                        data: [12000, 8000, 5000],
+                        backgroundColor: '#ef4444',
+                        borderRadius: 5
+                    },
+                    {
+                        label: 'Integrado (Depois)',
+                        data: [8500, 2000, 500],
+                        backgroundColor: '#10b981',
+                        borderRadius: 5
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true, grid: { color: '#334155' } }, x: { grid: { display: false } } }
+            }
+        });
+
+        // 2. Productivity Chart
+        new Chart(document.getElementById('prodChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                datasets: [{
+                    label: 'Instalações/Mês',
+                    data: [40, 42, 45, 55, 68, 75], // Crescimento após integração
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { grid: { color: '#334155' } }, x: { grid: { display: false } } }
+            }
+        });
+
+        // 3. Stock Rupture Chart
+        new Chart(document.getElementById('stockChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Disponível', 'Ruptura (Falta)'],
+                datasets: [{
+                    data: [98, 2], // 98% ok
+                    backgroundColor: ['#2563eb', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // 4. Statistics Chart (New)
+        new Chart(document.getElementById('statsChart'), {
+            type: 'line',
+            data: {
+                labels: ['1h', '2h', '3h', '4h (Média)', '5h', '6h', '7h'],
+                datasets: [{
+                    label: 'Probabilidade de Conclusão',
+                    data: [2, 10, 25, 40, 25, 10, 2], // Bell Curve shape
+                    borderColor: '#facc15',
+                    backgroundColor: 'rgba(250, 204, 21, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { display: false },
+                    x: { grid: { color: '#334155' } }
+                }
+            }
+        });
+
+        // Hero Chart (Mini)
+        new Chart(document.getElementById('heroChart'), {
+            type: 'line',
+            data: {
+                labels: ['10:00', '11:00', '12:00', '13:00', '14:00'],
+                datasets: [{
+                    data: [100, 120, 115, 140, 155],
+                    borderColor: '#10b981',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { display: false }, y: { display: false } }
+            }
+        });
+
+    </script>
+</body>
+</html>
